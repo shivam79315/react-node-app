@@ -1,0 +1,24 @@
+{
+  "i18n-ally.localesPaths": [
+    "web/frontend/locales"
+  ],
+  "i18n-ally.enabledFrameworks": [
+    "i18next-shopify"
+  ],
+  "i18n-ally.keystyle": "nested",
+  "files.exclude": {
+    ".env": "explorerExcludedFiles",
+    ".env.*": "explorerExcludedFiles",
+    "node_modules": "explorerExcludedFiles",
+    "coverage": "explorerExcludedFiles",
+    ".DS_Store": "explorerExcludedFiles",
+    "logs": "explorerExcludedFiles",
+    "*.log": "explorerExcludedFiles",
+    "config/tunnel.pid": "explorerExcludedFiles",
+    "dist/": "explorerExcludedFiles",
+    "extensions/*/build": "explorerExcludedFiles",
+    "web/database.sqlite": "explorerExcludedFiles",
+    ".shopify/*": "explorerExcludedFiles",
+    ".shopify.lock": "explorerExcludedFiles"
+  }
+}
