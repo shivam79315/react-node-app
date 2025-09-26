@@ -1,20 +1,16 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
 client_id = "cf5e0a9dcf3ba74b2807812d88b33e08"
 name = "ReactNodeApp"
-application_url = "https://example.com"
+application_url = "https://0064094379e5.ngrok-free.app"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-10"
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products, read_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://0064094379e5.ngrok-free.app/api/auth" ]

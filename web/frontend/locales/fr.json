@@ -8,19 +8,20 @@
     "yourAppIsReadyToExplore": "Votre application est prête à être explorée ! Elle contient tout ce dont vous avez besoin pour vous lancer, y compris le <PolarisLink>système de design Polaris</PolarisLink>, la <AdminApiLink>Shopify Admin API</AdminApiLink> ainsi que la bibliothèque et les composants d’IU <AppBridgeLink>App Bridge</AppBridgeLink>."
   },
   "NavigationMenu": {
-    "pageName": "Nom de la page",
-    "newroute": "Nouvelle page"
+    "pricing": "Tarification",
+    "products": "Produits",
+    "newRoute": "Nouvelle page"
   },
   "NotFound": {
     "description": "Vérifiez l’URL et réessayez, ou utilisez la barre de recherche pour trouver ce qu’il vous faut.",
     "heading": "Il n’y a aucune page à cette adresse"
   },
-  "PageName": {
+  "Pricing": {
     "body": "Corps",
     "heading": "En-tête",
     "primaryAction": "Action principale",
     "secondaryAction": "Action secondaire",
-    "title": "Nom de la page"
+    "title": "Tarification"
   },
   "ProductsCard": {
     "description": "Les exemples de produits sont créés avec un titre et un prix par défaut. Vous pouvez les supprimer à tout moment.",

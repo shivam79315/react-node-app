@@ -1,5 +1,5 @@
 import { GraphqlQueryError } from "@shopify/shopify-api";
-import shopify from "./shopify.js";
+import shopify from "../db/shopify.js";
 
 const ADJECTIVES = [
   "autumn",
@@ -80,30 +80,50 @@ const CREATE_PRODUCTS_MUTATION = `
   }
 `;
 
+export async function productCreatorBySessionId(
+  sessionId,
+  count = DEFAULT_PRODUCTS_COUNT,
+  reportProgress = () => {}
+) {
+  const session = await shopify.config.sessionStorage.loadSession(sessionId);
+  if (!session) throw new Error("Session not found for given sessionId");
+  return productCreator(session, count, reportProgress);
+}
+
 export default async function productCreator(
   session,
-  count = DEFAULT_PRODUCTS_COUNT
+  count = DEFAULT_PRODUCTS_COUNT,
+  reportProgress = () => {}
 ) {
   const client = new shopify.api.clients.Graphql({ session });
+  let created = 0;
 
   try {
     for (let i = 0; i < count; i++) {
-      await client.request(CREATE_PRODUCTS_MUTATION, {
-        variables: {
-          input: {
-            title: `${randomTitle()}`,
-          },
-        },
+      // 👇 capture response
+      const res = await client.request(CREATE_PRODUCTS_MUTATION, {
+        variables: { input: { title: randomTitle() } },
+      });
+
+      created++;
+      const productId = res?.data?.productCreate?.product?.id;
+      console.log(`[products] created product ${created}/${count}`, productId);
+
+      // report 0..100 progress to caller (e.g. BullMQ job)
+      const pct = Math.round((created / count) * 100);
+      reportProgress(pct, {
+        created,
+        total: count,
+        lastId: productId,
       });
     }
+
+    return { created };
   } catch (error) {
     if (error instanceof GraphqlQueryError) {
-      throw new Error(
-        `${error.message}\n${JSON.stringify(error.response, null, 2)}`
-      );
-    } else {
-      throw error;
+      throw new Error(`${error.message}\n${JSON.stringify(error.response, null, 2)}`);
     }
+    throw error;
   }
 }
 

@@ -3,7 +3,12 @@ import { useTranslation } from "react-i18next";
 import { NavMenu } from "@shopify/app-bridge-react";
 import Routes from "./Routes";
 
-import { QueryProvider, PolarisProvider } from "./components";
+import { QueryProvider } from "./components/providers/QueryProvider";
+import { PolarisProvider } from "./components/providers/PolarisProvider";
+
+import { AppProvider } from '@shopify/polaris';
+import enTranslations from "@shopify/polaris/locales/en.json";
+
 
 export default function App() {
   // Any .tsx or .jsx files in /pages will become a route
@@ -11,22 +16,23 @@ export default function App() {
   const pages = import.meta.glob("./pages/**/!(*.test.[jt]sx)*.([jt]sx)", {
     eager: true,
   });
+  console.log([...document.styleSheets].map(s => s.href || "[inline]"));
+
   const { t } = useTranslation();
 
   return (
-    <PolarisProvider>
-      <BrowserRouter>
-        <QueryProvider>
-          <NavMenu>
-            <Link to="/" rel="home">
-              Home
-            </Link>
-            <Link to="/pagename">{t("NavigationMenu.pageName")}</Link>
-            <Link to="/newroute">{t("NavigationMenu.newroute")}</Link>
-          </NavMenu>
-          <Routes pages={pages} />
-        </QueryProvider>
-      </BrowserRouter>
-    </PolarisProvider>
+     <AppProvider i18n={enTranslations} theme={{ colorScheme: "dark-experimental" }}>
+        <BrowserRouter>
+          <QueryProvider>
+            <NavMenu>
+              <Link to="/" rel="home">
+                Home
+              </Link>
+              <Link to="/pricing">{t("NavigationMenu.pricing")}</Link>
+            </NavMenu>
+            <Routes pages={pages} />
+          </QueryProvider>
+        </BrowserRouter>
+    </AppProvider>
   );
 }

@@ -5,14 +5,16 @@ import express from "express";
 import serveStatic from "serve-static";
 import cors from "cors";
 
-import shopify from "./shopify.js";
-import productCreator from "./product-creator.js";
+import shopify from "./db/shopify.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 
-const PORT = parseInt(
-  process.env.BACKEND_PORT || process.env.PORT || "3000",
-  10
-);
+// Routes
+import { sseRoutes } from "./routes/products.sse.js";
+import productTagsRoutes from "./routes/productTags.routes.js";
+import productsRoutes from "./routes/products.routes.js";
+import pricingRoutes from "./routes/pricing.routes.js";
+
+const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT || "3000", 10);
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -21,69 +23,38 @@ const STATIC_PATH =
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    credentials: true, 
-  })
-);
+app.use(cors({ origin: "*", credentials: true }));
 
-// Set up Shopify authentication and webhook handling
+// Shopify auth
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot()
 );
+
+// Webhooks FIRST (raw body required)
 app.post(
   shopify.config.webhooks.path,
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
-// If you are adding routes outside of the /api path, remember to
-// also add a proxy rule for them in web/frontend/vite.config.js
-
-app.use("/api/*", shopify.validateAuthenticatedSession());
-
+// JSON parser AFTER webhooks
 app.use(express.json());
 
-app.get("/new-route", (_req, res) => {
-  res.status(200).send("Hello, this is a new API route,,,,,,,,!");
-});
-app.get("/api/products/count", async (_req, res) => {
-  const client = new shopify.api.clients.Graphql({
-    session: res.locals.shopify.session,
-  });
+app.use("/api/products/jobs", sseRoutes);
 
-  const countData = await client.request(`
-    query shopifyProductCount {
-      productsCount {
-        count
-      }
-    }
-  `);
+// All other product routes (require session)
+app.use("/api/*", shopify.validateAuthenticatedSession());
+app.use("/api/products", productsRoutes);
+app.use("/api/product-tags", productTagsRoutes);
+app.use("/api/pricing", pricingRoutes);
 
-  res.status(200).send({ count: countData.data.productsCount.count });
-});
-
-app.post("/api/products", async (_req, res) => {
-  let status = 200;
-  let error = null;
-
-  try {
-    await productCreator(res.locals.shopify.session);
-  } catch (e) {
-    console.log(`Failed to process products/create: ${e.message}`);
-    status = 500;
-    error = e.message;
-  }
-  res.status(status).send({ success: status === 200, error });
-});
-
+// Shopify CSP + frontend static
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
-app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
+app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
   return res
     .status(200)
     .set("Content-Type", "text/html")
@@ -94,4 +65,4 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     );
 });
 
-app.listen(PORT);
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

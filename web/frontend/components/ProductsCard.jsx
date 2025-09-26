@@ -4,7 +4,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "react-query";
 
-export function ProductsCard() {
+export function ProductCreator() {
   const shopify = useAppBridge();
   const { t } = useTranslation();
   const [isPopulating, setIsPopulating] = useState(false);

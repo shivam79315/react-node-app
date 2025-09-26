@@ -12,7 +12,9 @@
     "deploy": "shopify app deploy"
   },
   "dependencies": {
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
   },
   "author": "CodeSapient",
   "private": true,
@@ -20,5 +22,8 @@
     "extensions/*",
     "web",
     "web/frontend"
-  ]
+  ],
+  "devDependencies": {
+    "node-pg-migrate": "^8.0.3"
+  }
 }

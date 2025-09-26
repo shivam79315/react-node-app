@@ -1,10 +1,17 @@
-import { BillingInterval, LATEST_API_VERSION } from "@shopify/shopify-api";
+import { BillingInterval } from "@shopify/shopify-api";
 import { shopifyApp } from "@shopify/shopify-app-express";
-import { SQLiteSessionStorage } from "@shopify/shopify-app-session-storage-sqlite";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-10";
-
+import {PostgreSQLSessionStorage} from '@shopify/shopify-app-session-storage-postgresql';
+import path from "path";
 import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from "url";
+
+// Recreate __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+// Load the .env that lives in /web/.env
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const DB_PATH = `${process.cwd()}/database.sqlite`;
 
@@ -21,14 +28,14 @@ const billingConfig = {
 
 const shopify = shopifyApp({
   api: {
-    apiVersion: LATEST_API_VERSION,
+    apiVersion: '2024-10',
     restResources,
     future: {
       customerAddressDefaultFix: true,
       lineItemBilling: true,
       unstable_managedPricingSupport: true,
     },
-    billing: undefined,
+    billing: billingConfig,
     apiKey: process.env.SHOPIFY_API_KEY,
     apiSecretKey: process.env.SHOPIFY_API_SECRET,
     hostName: process.env.HOST ? process.env.HOST.replace(/https?:\/\//, '') : undefined,
@@ -40,7 +47,9 @@ const shopify = shopifyApp({
   webhooks: {
     path: "/api/webhooks",
   },
-  sessionStorage: new SQLiteSessionStorage(DB_PATH),
+  sessionStorage: new PostgreSQLSessionStorage(
+    process.env.DATABASE_URL,
+  ),
 });
 
 export default shopify;
